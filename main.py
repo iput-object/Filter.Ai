@@ -23,7 +23,7 @@ LOG_FILE = "banned_logs.csv"
 # Configure Gemini
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel('gemini-pro')
+    model = genai.GenerativeModel('gemini-2.5-flash')
 else:
     logging.warning("GEMINI_API_KEY not found in environment variables.")
     model = None
