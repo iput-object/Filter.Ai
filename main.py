@@ -48,6 +48,30 @@ def log_ban(user, reason, message_text):
     except Exception as e:
         logging.error(f"Failed to write to log file: {e}")
 
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Sends documentation about the bot when /start command is used."""
+    documentation = """
+🤖 **Filter.AI - Spam Detection Bot**
+
+AI-powered spam detection for Telegram groups using Google Gemini.
+
+**How to Use:**
+Reply to any message with `/report` to analyze it. If it's spam or uncivilized, the user will be automatically banned.
+
+**Requirements:**
+• Bot must be an admin with ban permissions
+• Only text messages can be analyzed
+
+**Commands:**
+/start - Show this help
+/report - Report a message (reply to message)
+
+🔗 GitHub: https://github.com/iput-object/Filter.Ai
+
+(Open for contribution)
+"""
+    await update.message.reply_text(documentation, parse_mode='Markdown')
+
 async def report(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message or not update.message.reply_to_message:
         await update.message.reply_text("Please reply to a message with /report to report it.")
@@ -101,7 +125,10 @@ if __name__ == '__main__':
 
     application = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
     
+    start_handler = CommandHandler('start', start)
     report_handler = CommandHandler('report', report)
+    
+    application.add_handler(start_handler)
     application.add_handler(report_handler)
     
     logging.info("Bot is running...")
