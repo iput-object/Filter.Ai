@@ -105,6 +105,7 @@ async def report(update: Update, context: ContextTypes.DEFAULT_TYPE):
             chat_id = update.effective_chat.id
             
             try:
+                await context.bot.delete_message(chat_id, replied_message.message_id) # Delete the Message as well.
                 await context.bot.ban_chat_member(chat_id, user_to_ban.id)
                 log_ban(user_to_ban, result, message_text)
                 await update.message.reply_text(f"Message analyzed as {result}. User {user_to_ban.first_name} has been banned.")
