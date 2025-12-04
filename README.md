@@ -51,7 +51,7 @@ Filter.AI is an intelligent Telegram bot that helps keep your group chats clean 
    python main.py
    ```
 
-## 🎯 Usage
+## Usage
 
 ### Setting Up in Your Group
 
@@ -141,7 +141,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
-Considerably Start the Repo and have fun ✨
+Considerably give a Star to the Repo and have fun ✨
 
 ## Acknowledgments
 
