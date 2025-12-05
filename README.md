@@ -51,6 +51,11 @@ Filter.AI is an intelligent Telegram bot that helps keep your group chats clean 
    python main.py
    ```
 
+### or Docker Setup
+   **Build and Run** (.env on the root)
+   ```bash
+   docker compose up --build -d
+   ```
 ## Usage
 
 ### Setting Up in Your Group
