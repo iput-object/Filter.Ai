@@ -1,6 +1,16 @@
 services:
-  bot:
+  # Local service
+  filterai-local:
     build: .
+    image: filterai-local:latest
+    container_name: filterai-bot-local
     env_file:
       - .env
+    restart: unless-stopped
+
+  # Production service
+  filterai-production:
+    build: .
+    image: filterai-production:latest
+    container_name: filterai-bot-production
     restart: unless-stopped

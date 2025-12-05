@@ -51,11 +51,48 @@ Filter.AI is an intelligent Telegram bot that helps keep your group chats clean 
    python main.py
    ```
 
-### or Docker Setup
-   **Build and Run** (.env on the root)
-   ```bash
-   docker compose up --build -d
-   ```
+## Running with Docker.
+### Local Deployment
+
+```bash
+docker compose up --build filterai-local
+```
+
+* Uses `.env` file for credentials.
+* Stops and removes safely:
+
+```bash
+docker compose down filterai-local
+```
+
+---
+
+### Production Deployment
+
+```bash
+docker compose up -d filterai-production
+```
+
+* Uses environment variables injected by your hosting platform (e.g., Railway).
+* `.env` is ignored in production.
+* Stop and remove production container safely:
+
+```bash
+docker compose stop filterai-production
+docker compose rm filterai-production
+```
+
+---
+
+## Services Overview
+
+| Service               | Description             | Environment               |
+| --------------------- | ----------------------- | ------------------------- |
+| `filterai-local`      | Local testing/debugging | `.env` (local)            |
+| `filterai-production` | Production deployment   | Hosting platform env vars |
+
+---
+
 ## Usage
 
 ### Setting Up in Your Group
