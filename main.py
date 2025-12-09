@@ -18,7 +18,9 @@ logging.basicConfig(
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+LOG_CHANNEL=os.getenv("TELEGRAM_LOG_CHANNEL")
 LOG_FILE = "banned_logs.csv"
+ENVIRONMENT=os.getenv("ENVIRONMENT", "PRODUCTION")
 
 # Configure Gemini
 if GEMINI_API_KEY:
@@ -48,6 +50,28 @@ def log_ban(user, reason, message_text):
     except Exception as e:
         logging.error(f"Failed to write to log file: {e}")
 
+async def log_ban_telegram(update: Update, context: ContextTypes.DEFAULT_TYPE, user, reason, message_text):
+    if not LOG_CHANNEL:
+        logging.warn('Log Channel ID not provided yet..')
+        return
+    
+    user_id = user.id
+    full_name = user.full_name 
+
+    message = (
+        f"User Banned Alert\n"
+        f"User: <a href='tg://user?id={user_id}'>{full_name}</a>\n"
+        f"Reason: {reason}\n"
+        f"Message: {message_text}"
+    )
+
+    await context.bot.send_message(
+        chat_id=LOG_CHANNEL,
+        text=message,
+        parse_mode="HTML"
+    )
+
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Sends documentation about the bot when /start command is used."""
     documentation = """
@@ -66,6 +90,10 @@ Reply to any message with `/report` to analyze it. If it's spam or uncivilized, 
 /start - Show this help
 /report - Report a message (reply to message)
 
+**Logs Channel**
+Telegram - @filterAiLogs
+
+**Source Code**
 🔗 GitHub: https://github.com/iput-object/Filter.Ai
 
 (Open for contribution)
@@ -78,10 +106,10 @@ async def report(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     replied_message = update.message.reply_to_message
-    message_text = replied_message.text
+    message_text = replied_message.caption or replied_message.text # texts and captions
 
     if not message_text:
-        await update.message.reply_text("I can only analyze text messages for now.")
+        await update.message.reply_text("I can only analyze texts or captions messages for now.")
         return
 
     if not model:
@@ -107,8 +135,13 @@ async def report(update: Update, context: ContextTypes.DEFAULT_TYPE):
             try:
                 await context.bot.delete_message(chat_id, replied_message.message_id) # Delete the Message as well.
                 await context.bot.ban_chat_member(chat_id, user_to_ban.id)
-                log_ban(user_to_ban, result, message_text)
                 await update.message.reply_text(f"Message analyzed as {result}. User {user_to_ban.first_name} has been banned.")
+
+                if (ENVIRONMENT == "PRODUCTION"):
+                    await log_ban_telegram(update , context , user_to_ban, result, message_text)
+                else:
+                    log_ban(user_to_ban, result, message_text)
+
             except Exception as e:
                 logging.error(f"Failed to ban user: {e}")
                 await update.message.reply_text(f"Message analyzed as {result}, but I couldn't ban the user. Make sure I am an admin.")

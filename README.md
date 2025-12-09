@@ -10,7 +10,7 @@ Filter.AI is an intelligent Telegram bot that helps keep your group chats clean 
 
 - **AI-Powered Analysis**: Leverages Google Gemini 2.5 Flash for intelligent message classification
 - **Automatic Moderation**: Bans users and deletes messages identified as spam or uncivilized
-- **Detailed Logging**: Maintains a CSV log of all banned users with timestamps and reasons
+- **Detailed Logging**: Maintains a CSV(for local) and @t.me/filterAiLogs for production log of all banned users with timestamps and reasons
 - **Simple Commands**: Easy-to-use interface with `/start` and `/report` commands
 - **Privacy-Focused**: Only analyzes messages when explicitly reported by group members
 
@@ -44,6 +44,8 @@ Filter.AI is an intelligent Telegram bot that helps keep your group chats clean 
    ```
    TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
    GEMINI_API_KEY=your_gemini_api_key_here
+   TELEGRAM_LOG_CHANNEL=your_telegram_log_channel_id_here
+   ENVIRONMENT=your_build_environment_here #PRODUCTION OR DEVELOPMENT
    ```
 
 4. **Run the bot**
@@ -114,17 +116,18 @@ docker compose rm filterai-production
 3. If classified as "spam" or "uncivilized":
    - The message is deleted
    - The user is banned from the group
-   - The incident is logged to `banned_logs.csv`
+   - The incident is logged to `banned_logs.csv` or to @t.me/filterAiLogs
 4. If the message is safe, the bot notifies that no action is needed
 
 ## Logging
 
-All ban actions are logged to `banned_logs.csv` with the following information:
+LOCAL: All ban actions are logged to `banned_logs.csv` with the following information:
 - Timestamp
 - User ID
 - Username
 - Reason (spam/uncivilized)
 - Message content
+PRODUCTION: All bans will be logged to @t.me/filterAiLogs (Depends on the CHANNEL_ID)
 
 ## Technical Details
 
@@ -170,8 +173,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Limitations
 
-- Currently only analyzes text messages
-- Requires admin permissions to function
+- Currently only analyzes texts & captions messages
 - Depends on Gemini AI availability and API limits
 
 ## Future Enhancements
