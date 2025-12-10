@@ -80,7 +80,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 AI-powered spam detection for Telegram groups using Google Gemini.
 
 **How to Use:**
-Reply to any message with `/report` to analyze it. If it's spam or uncivilized, the user will be automatically banned.
+Reply to any message with `/report` to analyze it. If it's spam, the user will be automatically banned.
 
 **Requirements:**
 • Bot must be an admin with ban permissions
@@ -119,15 +119,22 @@ async def report(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Analyze with Gemini
     try:
         prompt = (
-            f"Analyze the following message and determine if it is 'spam', 'uncivilized', or 'safe'. "
-            f"Return ONLY one of these three words.\n\nMessage: \"{message_text}\""
+            f"Analyze the following message and classify it as 'spam' or 'safe'. "
+            "Consider the overall content of the message. "
+            "Label the message as 'spam' if it contains: "
+            "- Unsolicited advertising, links, or offers, especially for adult content or products. "
+            "- Any content that appears deceptive or intended to trick the reader. "
+            "- Harassment, explicit sexual content, or any form of exploitation. "
+            "If the message does not contain any of the above and seems generally harmless, label it as 'safe'. "
+            "Return ONLY one of these two words: 'spam' or 'safe'.\n\n"
+            f"Message: \"{message_text}\""
         )
         response = model.generate_content(prompt)
         result = response.text.strip().lower()
         
         logging.info(f"Gemini analysis result: {result}")
 
-        if "spam" in result or "uncivilized" in result:
+        if "spam" in result:
             # Ban the user
             user_to_ban = replied_message.from_user
             chat_id = update.effective_chat.id

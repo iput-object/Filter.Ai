@@ -4,12 +4,12 @@ AI-powered spam detection and moderation bot for Telegram groups using Google Ge
 
 ## Overview
 
-Filter.AI is an intelligent Telegram bot that helps keep your group chats clean and civilized. Using Google's Gemini AI, it analyzes reported messages to detect spam and uncivilized content, automatically banning offenders and maintaining a detailed log of all actions.
+Filter.AI is an intelligent Telegram bot that helps keep your group chats clean and civilized. Using Google's Gemini AI, it analyzes reported messages to detect spam content, automatically banning offenders and maintaining a detailed log of all actions.
 
 ## Features
 
 - **AI-Powered Analysis**: Leverages Google Gemini 2.5 Flash for intelligent message classification
-- **Automatic Moderation**: Bans users and deletes messages identified as spam or uncivilized
+- **Automatic Moderation**: Bans users and deletes messages identified as spam 
 - **Detailed Logging**: Maintains a CSV(for local) and @t.me/filterAiLogs for production log of all banned users with timestamps and reasons
 - **Simple Commands**: Easy-to-use interface with `/start` and `/report` commands
 - **Privacy-Focused**: Only analyzes messages when explicitly reported by group members
@@ -113,7 +113,7 @@ docker compose rm filterai-production
 
 1. A user replies to a suspicious message with `/report`
 2. The bot analyzes the message content using Gemini AI
-3. If classified as "spam" or "uncivilized":
+3. If classified as "spam":
    - The message is deleted
    - The user is banned from the group
    - The incident is logged to `banned_logs.csv` or to @t.me/filterAiLogs
@@ -125,7 +125,7 @@ LOCAL: All ban actions are logged to `banned_logs.csv` with the following inform
 - Timestamp
 - User ID
 - Username
-- Reason (spam/uncivilized)
+- Reason (spam)
 - Message content
 PRODUCTION: All bans will be logged to @t.me/filterAiLogs (Depends on the CHANNEL_ID)
 
