@@ -119,16 +119,18 @@ async def report(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Analyze with Gemini
     try:
         prompt = (
-            f"Analyze the following message and classify it as 'spam' or 'safe'. "
-            "Consider the overall content of the message. "
-            "Label the message as 'spam' if it contains: "
-            "- Unsolicited advertising, links, or offers, especially for adult content or products. "
-            "- Any content that appears deceptive or intended to trick the reader. "
-            "- Harassment, explicit sexual content, or any form of exploitation. "
-            "If the message does not contain any of the above and seems generally harmless, label it as 'safe'. "
-            "Return ONLY one of these two words: 'spam' or 'safe'.\n\n"
-            f"Message: \"{message_text}\""
-        )
+    "Classify the message as ONLY one of these two words: spam or safe.\n\n"
+    "Definition:\n"
+    "- spam: unsolicited advertising, promotions, affiliate/referral links, repeated marketing, "
+    "crypto/forex/NFT promos, adult offers, phishing, scams, impersonation, deceptive links, "
+    "requests for money, giveaways with suspicious links.\n"
+    "- safe: everything else.\n\n"
+    "Important policy note:\n"
+    "- Do NOT label as spam just because it contains profanity, insults, or racial/hate slurs.\n"
+    "- Hate/offensive language is OUT OF SCOPE for spam detection and must be labeled safe unless it is also advertising/scam.\n\n"
+    f"Message: \"{message_text}\""
+)
+
         response = model.generate_content(prompt)
         result = response.text.strip().lower()
         
