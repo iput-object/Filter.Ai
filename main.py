@@ -30,6 +30,27 @@ else:
     logging.warning("GEMINI_API_KEY not found in environment variables.")
     model = None
 
+def get_message_text(message):
+    """Return message text from either text messages or media captions."""
+    return (message.caption or message.text or "").strip()
+
+def get_message_kind(message):
+    """Return a compact label for the replied Telegram message type."""
+    message_types = [
+        "text", "photo", "video", "animation", "document", "audio", "voice",
+        "video_note", "sticker", "poll", "contact", "location", "venue",
+        "dice", "game", "invoice", "successful_payment"
+    ]
+
+    for message_type in message_types:
+        if getattr(message, message_type, None):
+            return message_type.replace("_", " ")
+
+    if getattr(message, "story", None):
+        return "story"
+
+    return "unknown message type"
+
 def log_ban(user, reason, message_text):
     """Logs the ban details to a CSV file."""
     file_exists = os.path.isfile(LOG_FILE)
@@ -84,7 +105,7 @@ Reply to any message with `/report` to analyze it. If it's spam, the user will b
 
 **Requirements:**
 • Bot must be an admin with ban permissions
-• Only text messages can be analyzed
+• Only messages with text or captions can be analyzed
 
 **Commands:**
 /start - Show this help
@@ -106,10 +127,25 @@ async def report(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     replied_message = update.message.reply_to_message
-    message_text = replied_message.caption or replied_message.text # texts and captions
+    message_text = get_message_text(replied_message)
 
     if not message_text:
-        await update.message.reply_text("I can only analyze texts or captions messages for now.")
+        message_kind = get_message_kind(replied_message)
+        logging.info(
+            "Unanalyzable replied message detected: type=%s caption=%r text=%r story=%r",
+            message_kind,
+            replied_message.caption,
+            replied_message.text,
+            getattr(replied_message, "story", None),
+        )
+        if message_kind == "story":
+            await update.message.reply_text(
+                "I can't analyze Telegram stories yet. Telegram only sends me a story reference here, not the story text or caption."
+            )
+        else:
+            await update.message.reply_text(
+                f"I can only analyze messages that contain text or a caption. Detected: {message_kind}."
+            )
         return
 
     if not model:
