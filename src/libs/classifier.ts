@@ -1,23 +1,29 @@
 import type { Bindings } from '../types/types';
 import { SPAM_QUESTIONS } from '../configs/jev';
 
+const SPAM_THRESHOLD = 0.8;
+
 export interface Verdict {
   isSpam: boolean;
   category: string;
+  score: number;
 }
 
 export async function classify(env: Bindings, text: string): Promise<Verdict> {
-  const raw: any = await env.AI.run('typesafe/jev' as any, {
+  const res: any = await env.AI.run('typesafe/jev' as any, {
     state: text,
     questions: SPAM_QUESTIONS,
   } as any);
 
-  const answers = raw?.answers ?? raw?.result?.answers ?? raw?.response?.answers;
-  const isSpam = answers?.is_spam?.value ?? raw?.is_spam ?? false;
-  const category = answers?.category?.value ?? raw?.category ?? 'unknown';
+  const answers = res?.answers;
+  if (!answers?.is_spam) {
+    throw new Error(`Unexpected jev response: ${JSON.stringify(res)}`);
+  }
 
+  const score = Number(answers.is_spam.noul);
   return {
-    isSpam: isSpam === true,
-    category: String(category),
+    isSpam: score >= SPAM_THRESHOLD,
+    category: String(answers.category?.choice ?? 'unknown'),
+    score,
   };
 }

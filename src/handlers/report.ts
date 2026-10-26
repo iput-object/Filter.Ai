@@ -1,7 +1,6 @@
 import type { Bindings, TgMessage } from '../types/types';
 import type { Telegram } from '../libs/telegram';
 import { classify } from '../libs/classifier';
-import { getGroup, listGroups } from '../libs/db';
 import { esc, getKind, getText } from '../utils/message';
 
 export async function handleReport(env: Bindings, tg: Telegram, msg: TgMessage) {
@@ -28,9 +27,11 @@ export async function handleReport(env: Bindings, tg: Telegram, msg: TgMessage) 
   try {
     verdict = await classify(env, text);
   } catch (e) {
-    console.error('Analysis error:', e);
+    console.error('Analysis error:', e instanceof Error ? e.message : JSON.stringify(e));
     return void (await tg.reply(chatId, 'An error occurred while analyzing the message.'));
   }
+
+  console.log('verdict:', verdict);
 
   if (!verdict.isSpam) {
     return void (await tg.reply(chatId, 'Message seems safe.'));
@@ -47,28 +48,11 @@ export async function handleReport(env: Bindings, tg: Telegram, msg: TgMessage) 
       `Message analyzed as spam (${esc(verdict.category)}). User ${esc(user.first_name)} has been banned.`,
     );
   } catch (e) {
-    console.error('Ban failed:', e);
+    console.error('Ban failed:', e instanceof Error ? e.message : e);
     return void (await tg.reply(
       chatId,
       `Message analyzed as spam, but I couldn't ban the user. Make sure I am an admin.`,
     ));
-  }
-
-  // Universal Sync: propagate ban to other groups with universal sync enabled
-  try {
-    const currentGroup = await getGroup(env.DB, chatId);
-    if (currentGroup?.universalSync) {
-      const syncGroups = await listGroups(env.DB, { status: 'active', universalSyncOnly: true });
-      for (const group of syncGroups) {
-        if (group.chatId !== chatId) {
-          tg.ban(group.chatId, user.id).catch((err) =>
-            console.error(`Universal sync ban failed for group ${group.chatId}:`, err),
-          );
-        }
-      }
-    }
-  } catch (err) {
-    console.error('Universal sync error:', err);
   }
 
   await logBan(env, tg, user, verdict.category, text);
@@ -97,6 +81,6 @@ async function logBan(
         `Message: ${esc(text)}`,
     });
   } catch (e) {
-    console.error('Log channel failed:', e);
+    console.error('Log channel failed:', e instanceof Error ? e.message : e);
   }
 }
