@@ -1,6 +1,7 @@
-import type { Bindings, TgMessage } from '../types/types';
+import type { Bindings, TgMessage } from '../types';
 import type { Telegram } from '../libs/telegram';
 import { classify } from '../libs/classifier';
+import { getGroup, listGroups } from '../libs/db';
 import { esc, getKind, getText } from '../utils/message';
 
 export async function handleReport(env: Bindings, tg: Telegram, msg: TgMessage) {
@@ -55,6 +56,23 @@ export async function handleReport(env: Bindings, tg: Telegram, msg: TgMessage) 
     ));
   }
 
+  // Universal Sync: propagate ban to other groups with universal sync enabled
+  try {
+    const currentGroup = await getGroup(env.DB, chatId);
+    if (currentGroup?.universalSync) {
+      const syncGroups = await listGroups(env.DB, { status: 'active', universalSyncOnly: true });
+      for (const group of syncGroups) {
+        if (group.chatId !== chatId) {
+          tg.ban(group.chatId, user.id).catch((err) =>
+            console.error(`Universal sync ban failed for group ${group.chatId}:`, err),
+          );
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Universal sync error:', err);
+  }
+
   await logBan(env, tg, user, verdict.category, text);
 }
 
@@ -66,7 +84,7 @@ async function logBan(
   text: string,
 ) {
   const name = [user.first_name, user.last_name].filter(Boolean).join(' ');
-  if (env.ENVIRONMENT !== 'PRODUCTION' || !env.TELEGRAM_LOG_CHANNEL) {
+  if (!env.TELEGRAM_LOG_CHANNEL) {
     console.log('BAN', { id: user.id, username: user.username, reason, text });
     return;
   }

@@ -1,3 +1,5 @@
+export const JEV_MODEL = 'typesafe/jev';
+
 export const SPAM_QUESTIONS = {
   is_spam: {
     type: 'noul',

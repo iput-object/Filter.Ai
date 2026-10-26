@@ -3,8 +3,14 @@ export interface Bindings {
   DB: D1Database;
   TELEGRAM_BOT_TOKEN: string;
   WEBHOOK_SECRET: string;
+  GEMINI_API_KEY?: string;
+  AI_PROVIDER?: 'jev' | 'gemini' | 'both';
   TELEGRAM_LOG_CHANNEL?: string;
-  ENVIRONMENT?: string;
+}
+
+export interface Verdict {
+  isSpam: boolean;
+  category: string;
 }
 
 export interface GroupSettings {
