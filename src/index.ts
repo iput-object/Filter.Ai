@@ -3,7 +3,6 @@ import { Telegram } from './libs/telegram';
 import { handleStart } from './handlers/start';
 import { handleReport } from './handlers/report';
 import { handleSettings } from './handlers/settings';
-import { handleGroups } from './handlers/groups';
 import { upsertGroup, updateGroupStatus } from './libs/db';
 
 async function handleUpdate(update: Update, env: Bindings) {
@@ -53,7 +52,6 @@ async function handleUpdate(update: Update, env: Bindings) {
   if (cmd === 'start') await handleStart(tg, msg);
   else if (cmd === 'report') await handleReport(env, tg, msg);
   else if (cmd === 'settings') await handleSettings(env, tg, msg);
-  else if (cmd === 'groups') await handleGroups(env, tg, msg);
 }
 
 export default {

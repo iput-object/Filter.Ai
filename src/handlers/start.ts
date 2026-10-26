@@ -16,7 +16,6 @@ Reply to any message with <code>/report</code>. If it's spam, the user is banned
 /start - Show this help
 /report - Report a message (reply to it)
 /settings - View or toggle group settings (e.g. Universal Sync)
-/groups - Show connected groups
 
 <b>Logs:</b> @filterAiLogs
 <b>Source:</b> https://github.com/iput-object/Filter.Ai (open for contribution)`;
