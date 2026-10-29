@@ -33,7 +33,12 @@ async function handleUpdate(update: Update, env: Bindings) {
   const msg = update.message;
   if (!msg) return;
 
-  // Track group presence whenever messages arrive from groups
+  if (!msg.text) return;
+
+  const cmd = msg.text.match(/^\/(\w+)(?:@\w+)?/)?.[1]?.toLowerCase();
+  if (!cmd) return;
+
+  // Track group presence only when a command is used
   if (msg.chat.type === 'group' || msg.chat.type === 'supergroup') {
     await upsertGroup(env.DB, {
       chatId: msg.chat.id,
@@ -43,11 +48,6 @@ async function handleUpdate(update: Update, env: Bindings) {
       status: 'active',
     });
   }
-
-  if (!msg.text) return;
-
-  const cmd = msg.text.match(/^\/(\w+)(?:@\w+)?/)?.[1]?.toLowerCase();
-  if (!cmd) return;
 
   if (cmd === 'start') await handleStart(tg, msg);
   else if (cmd === 'report') await handleReport(env, tg, msg);

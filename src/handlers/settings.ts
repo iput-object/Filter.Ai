@@ -1,6 +1,6 @@
 import type { Bindings, TgMessage } from '../types/types';
 import type { Telegram } from '../libs/telegram';
-import { getGroup, updateGroupSettings, upsertGroup } from '../libs/db';
+import { getGroup, updateGroupSettings } from '../libs/db';
 import { esc } from '../utils/message';
 
 export async function handleSettings(env: Bindings, tg: Telegram, msg: TgMessage) {
@@ -24,15 +24,6 @@ export async function handleSettings(env: Bindings, tg: Telegram, msg: TgMessage
     return void (await tg.reply(chatId, '⚠️ Only group administrators can view or update settings.'));
   }
 
-  // Ensure group exists in DB
-  await upsertGroup(env.DB, {
-    chatId,
-    title: msg.chat.title || 'Untitled Group',
-    type: msg.chat.type,
-    username: msg.chat.username,
-    status: 'active',
-  });
-
   const text = (msg.text || '').trim();
   const parts = text.split(/\s+/);
   const subCommand = parts[1]?.toLowerCase();
@@ -41,7 +32,7 @@ export async function handleSettings(env: Bindings, tg: Telegram, msg: TgMessage
   // Handle toggling universal sync: /settings sync on|off
   if (subCommand === 'sync') {
     if (subValue === 'on' || subValue === 'enable' || subValue === '1') {
-      const updated = await updateGroupSettings(env.DB, chatId, { universalSync: true });
+      await updateGroupSettings(env.DB, chatId, { universalSync: true });
       return void (await tg.reply(
         chatId,
         `✅ <b>Universal Sync is now ENABLED</b> for <b>${esc(msg.chat.title || 'this group')}</b>.\n\n` +
